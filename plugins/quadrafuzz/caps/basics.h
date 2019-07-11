@@ -47,8 +47,6 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "ladspa.h"
-
 typedef __int8_t			int8;
 typedef __uint8_t			uint8;
 typedef __int16_t			int16;
@@ -62,49 +60,9 @@ typedef __uint64_t		uint64;
 /* smallest non-denormal 32 bit IEEE float is 1.18e-38 */
 #define NOISE_FLOOR 1e-20 /* -400 dB */
 
-#define HARD_RT  LADSPA_PROPERTY_HARD_RT_CAPABLE
-
-/* some LADSPA_DEFINES_THAT_COME_WITH_LOTS_OF_CHARACTERS */
-#define INPUT   LADSPA_PORT_INPUT
-#define OUTPUT  LADSPA_PORT_OUTPUT
-#define CONTROL LADSPA_PORT_CONTROL
-#define AUDIO   LADSPA_PORT_AUDIO
-
-#define AUDIO_IN  AUDIO|INPUT
-#define AUDIO_OUT AUDIO|OUTPUT
-#define CTRL_IN  	CONTROL|INPUT
-#define CTRL_OUT 	CONTROL|OUTPUT
-
-/* extending LADSPA_PORT_* */
-#define LADSPA_PORT_GROUP (AUDIO<<1) /* 16 */
-#define GROUP    LADSPA_PORT_GROUP
-
-/* more LADSPA_DEFINES_THAT_REALLY_COME_WITH_LOTS_OF_CHARACTERS */
-#define BOUNDED  (LADSPA_HINT_BOUNDED_BELOW | LADSPA_HINT_BOUNDED_ABOVE)
-#define INTEGER  LADSPA_HINT_INTEGER
-#define LOG      LADSPA_HINT_LOGARITHMIC
-#define TOGGLE   LADSPA_HINT_TOGGLED
-
-#define DEFAULT_0     LADSPA_HINT_DEFAULT_0
-#define DEFAULT_1     LADSPA_HINT_DEFAULT_1
-#define DEFAULT_100   LADSPA_HINT_DEFAULT_100
-#define DEFAULT_440   LADSPA_HINT_DEFAULT_440
-#define DEFAULT_MIN   LADSPA_HINT_DEFAULT_MINIMUM
-#define DEFAULT_LOW   LADSPA_HINT_DEFAULT_LOW
-#define DEFAULT_MID   LADSPA_HINT_DEFAULT_MIDDLE
-#define DEFAULT_HIGH  LADSPA_HINT_DEFAULT_HIGH
-#define DEFAULT_MAX   LADSPA_HINT_DEFAULT_MAXIMUM
-
 /* //////////////////////////////////////////////////////////////////////// */
 
-typedef struct {
-	const char * name;
-	LADSPA_PortDescriptor descriptor;
-	LADSPA_PortRangeHint range;
-	const char * meta;
-} PortInfo;
-
-typedef LADSPA_Data sample_t;
+typedef float sample_t;
 typedef unsigned int uint;
 typedef unsigned long ulong;
 
@@ -168,38 +126,5 @@ inline double lin2db (double lin) { return 20*log10(lin); }
 #else
 	#define TRAP
 #endif
-
-/* //////////////////////////////////////////////////////////////////////// */
-
-#define CAPS "C* "
-
-class Plugin 
-{
-	public:
-		float fs, over_fs; /* sample rate and 1/fs */
-		float adding_gain; /* for run_adding() */
-
-		int first_run; /* 1st block after activate(), do no parameter smoothing */
-		sample_t normal; /* renormal constant */
-
-		sample_t ** ports;
-		LADSPA_PortRangeHint * ranges; /* for getport() below */
-
-	public:
-		/* get port value, mapping inf or nan to 0 */
-		inline sample_t getport_unclamped (int i)
-			{
-				sample_t v = *ports[i];
-				return (isinf (v) || isnan(v)) ? 0 : v;
-			}
-
-		/* get port value and clamp to port range */
-		inline sample_t getport (int i)
-			{
-				LADSPA_PortRangeHint & r = ranges[i];
-				sample_t v = getport_unclamped (i);
-				return clamp (v, r.LowerBound, r.UpperBound);
-			}
-};
 
 #endif /* BASICS_H */
