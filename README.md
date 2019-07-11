@@ -1,4 +1,4 @@
-# quadrafuzz.lv2
+# quadrafuzz
 Multi-band fuzz distortion plugin
 
 # Introduction
@@ -7,4 +7,4 @@ This is a plugin conversion of the Quadrafuzz effect from [Pizzicato.js](https:/
 
 # Builds
 
-Get from [Open Build Service](https://software.opensuse.org//download.html?project=home%3Ajpcima&package=quadrafuzz.lv2).
+Get from [Open Build Service](https://software.opensuse.org/download.html?project=home%3Ajpcima&package=quadrafuzz).
