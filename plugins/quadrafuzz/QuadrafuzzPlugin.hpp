@@ -72,7 +72,7 @@ private:
     enum { Bands = 4 };
 
     WebCore::Biquad fBiquad[Bands];
-    DSP::Oversampler<2, 64> fOver2x;
+    DSP::Oversampler<2, 32> fOver2x;
     DSP::Oversampler<4, 64> fOver4x;
     DSP::Oversampler<8, 64> fOver8x;
 };
