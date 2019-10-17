@@ -69,6 +69,13 @@ int64_t QuadrafuzzPlugin::getUniqueId() const
     return d_cconst(DISTRHO_PLUGIN_UNIQUE_ID);
 }
 
+static constexpr std::array<std::pair<int, const char *>, 4> OversamplingValues {{
+    {1, "none"},
+    {2, "2x"},
+    {4, "4x"},
+    {8, "8x"},
+}};
+
 void QuadrafuzzPlugin::initParameter(uint32_t index, Parameter &parameter)
 {
     parameter.hints = kParameterIsAutomable;
@@ -122,19 +129,18 @@ void QuadrafuzzPlugin::initParameter(uint32_t index, Parameter &parameter)
         parameter.ranges = ParameterRanges(0.6, 0.0, 1.0);
         break;
     case pIdOversampling: {
-        std::array<std::pair<int, const char *>, 4> ev =
-            {{{1, "none"}, {2, "2x"}, {4, "4x"}, {8, "8x"}}};
-        ParameterEnumerationValue *enumValues = new ParameterEnumerationValue[ev.size()];
+        ParameterEnumerationValue *enumValues =
+            new ParameterEnumerationValue[OversamplingValues.size()];
         parameter.enumValues.values = enumValues;
-        parameter.enumValues.count = ev.size();
+        parameter.enumValues.count = OversamplingValues.size();
         parameter.enumValues.restrictedMode = true;
-        for (size_t i = 0; i < ev.size(); ++i) {
-            enumValues[i].value = ev[i].first;
-            enumValues[i].label = ev[i].second;
+        for (size_t i = 0; i < OversamplingValues.size(); ++i) {
+            enumValues[i].value = OversamplingValues[i].first;
+            enumValues[i].label = OversamplingValues[i].second;
         }
         parameter.symbol = "Oversampling";
         parameter.name = "Oversampling";
-        parameter.ranges = ParameterRanges(1, 1, ev.back().first);
+        parameter.ranges = ParameterRanges(1, 1, OversamplingValues.back().first);
         parameter.hints = kParameterIsInteger;
         break;
     }
@@ -206,8 +212,15 @@ void QuadrafuzzPlugin::setParameterValue(uint32_t index, float value)
         fHighDrive = value;
         break;
     case pIdOversampling:
-        fOversampling = (unsigned)value;
+    {
+        unsigned o;
+        unsigned index = OversamplingValues.size() - 1;
+        do
+            o = OversamplingValues[index].first;
+        while (value < o && index-- > 0);
+        fOversampling = o;
         break;
+    }
     default:
         DISTRHO_SAFE_ASSERT(false);
     }
