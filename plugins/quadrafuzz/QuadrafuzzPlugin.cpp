@@ -75,7 +75,7 @@ void QuadrafuzzPlugin::initParameter(uint32_t index, Parameter &parameter)
 
     switch (index) {
     case pIdBypass:
-        parameter.designation = kParameterDesignationBypass;
+        parameter.initDesignation(kParameterDesignationBypass);
         break;
     case pIdInputGain:
         parameter.symbol = "InputGain";
